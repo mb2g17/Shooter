@@ -1,0 +1,640 @@
+<html>
+
+	<head>
+		<title>Space Business</title>
+        	
+            <script type="text/javascript" src="enemyShip.js"> </script>
+            
+			<script>
+				
+				alert(" -- STORY --");
+				alert("You are a space cadet, and your mission is to eliminate all enemy ships in sight.");
+				alert("\'This mission is quite easy\', you think to yourself.");
+				alert("\'I\'ll get this done in no time.\'");
+				
+				alert(" -- TUTORIAL --");
+				alert("WASD keys to move");
+				alert("Space bar to shoot");
+				alert("Click on the \'Purchase\' buttons to buy upgrades and items.");
+				alert("The amount of money (credits) you have can be seen at the top left of the screen.");
+				alert("You can use credits to buy upgrades and items.");
+				alert("To get more information from a particular upgrade or item, click on it\'s icon.");
+				
+	            var isMovingLeft;
+	            var isMovingRight;
+	            var isMovingUp;
+	            var isMovingDown;
+				var isSpacePressed;
+				var rapidFireEnabled = false;
+				var hasShotOnce = false;
+				var isProtected = false;
+				var isWaving = false;
+				
+				var speed = 5;
+				var health = 100;
+				var money = 0;
+				var bulletSprite = "bullet.png";
+				var bulletSpeed = 10;
+				var radius = 6;
+	            
+	            var ship = document.createElement("img");
+	            ship.src = "ship.png";
+	            ship.style.left = 20;
+	            ship.style.top = 300;
+				
+				var background = document.createElement("img");
+				background.src = "spaceBackground.png";
+				background.style.left = 0;
+				background.style.top = 0;
+				
+				var bullets = new Array();
+				var enemyShips = new Array();
+				
+				// RGB function
+				function rgb(r, g, b)
+				{
+  					return "rgb(" + Math.round(r) + "," + Math.round(g) + "," + Math.round(b) + ")";
+				}
+				
+	            // Step function
+	            setInterval(function()
+	            {
+					var myCanvas = document.getElementById("myCanvas");
+                	var context = myCanvas.getContext('2d');
+					
+					// Clears the screen
+					context.drawImage(background, parseInt(background.style.left), parseInt(background.style.top));
+					context.drawImage(background, parseInt(background.style.left) + background.width, parseInt(background.style.top));
+					context.drawImage(background, parseInt(background.style.left) + background.width * 2, parseInt(background.style.top));
+					background.style.left = String(parseInt(background.style.left) - 2);
+					
+					if (parseInt(background.style.left) <= background.width * -1)
+					{
+						background.style.left = 0;
+					}
+					
+					// Draws money
+					context.font = "15px Georgia";
+					context.fillStyle = "#FFFFFF";
+					context.fillText("Money: " + money + " credits", 30, 30);
+					
+					// Draws the ship
+                    context.drawImage(ship, 0, 0, ship.width, ship.height, parseInt(ship.style.left), parseInt(ship.style.top), ship.width, ship.height);
+					
+					// Draws health bar
+					if (isProtected === false)
+						context.fillStyle = rgb(Number(255 - 2.55 * health), Number(2.55 * health), 0);
+					else
+						context.fillStyle = rgb(23, 156, 255);
+					context.fillRect(parseInt(ship.style.left), parseInt(ship.style.top) - 15, ship.width * (health / 100), 8);
+					
+					// Draws the bullets
+					for (var i = 0; i < bullets.length + 1; i++)
+					{
+						if (typeof bullets[i] != "undefined")
+						{
+							context.drawImage(bullets[i], 0, 0, bullets[i].width, bullets[i].height, parseInt(bullets[i].style.left), parseInt(bullets[i].style.top), bullets[i].width, bullets[i].height);
+							bullets[i].style.left = String(parseInt(bullets[i].style.left) + bulletSpeed);
+							
+							if (parseInt(bullets[i].style.left) >= myCanvas.width)
+							{
+								bullets.splice(i, 1);
+							}
+						}
+					}
+					
+					// Updates the enemy ships
+					for (var i = 0; i < enemyShips.length + 1; i++)
+					{
+						if (typeof enemyShips[i] != "undefined")
+						{
+							// Draws the sprite
+							context.drawImage(enemyShips[i].image, 0, 0, enemyShips[i].image.width, enemyShips[i].image.height, parseInt(enemyShips[i].image.style.left), parseInt(enemyShips[i].image.style.top), enemyShips[i].image.width, enemyShips[i].image.height);
+							
+							// Draws the health bar
+							context.fillStyle = rgb(Number(255 - 2.55 * enemyShips[i].health), Number(2.55 * enemyShips[i].health), 0);
+							context.fillRect(parseInt(enemyShips[i].image.style.left), parseInt(enemyShips[i].image.style.top) - 15, enemyShips[i].image.width * (enemyShips[i].health / 100), 8);
+							
+							// Sets the movement
+							enemyShips[i].image.style.left = String(parseInt(enemyShips[i].image.style.left) - 3) + "px";
+							
+							// If it's outside the screen
+							if (parseInt(enemyShips[i].image.style.left) <= 0)
+							{
+								enemyShips.splice(i, 1);
+							}
+							
+							// If it's health is equal to zero
+							if (enemyShips[i].health <= 0)
+							{
+								enemyShips.splice(i, 1);
+								money += 10;
+							}
+						}
+					}
+					
+					// Checks for bullet enemy ship collision events
+					for (var i = 0; i < bullets.length + 1; i++)
+					{
+						for (var j = 0; j < enemyShips.length + 1; j++)
+						{
+							if (typeof bullets[i] != "undefined" && typeof enemyShips[j] != "undefined")
+							{
+								if (parseInt(bullets[i].style.left) >= parseInt(enemyShips[j].image.style.left) - (enemyShips[j].image.width - 56) &&
+									parseInt(bullets[i].style.left) < parseInt(enemyShips[j].image.style.left) + enemyShips[j].image.width &&
+									parseInt(bullets[i].style.top) >= parseInt(enemyShips[j].image.style.top) - enemyShips[j].image.height &&
+									parseInt(bullets[i].style.top) < parseInt(enemyShips[j].image.style.top) + enemyShips[j].image.height)
+								{
+									bullets.splice(i, 1);
+									if (bulletSprite === "bullet.png")
+									{
+										enemyShips[j].health -= 25;
+									}
+									else if (bulletSprite === "bullet2.png")
+									{
+										enemyShips[j].health -= 34;
+									}
+									else if (bulletSprite === "bullet3.png")
+									{
+										enemyShips[j].health -= 50;
+									}
+								}
+							}
+						}
+					}
+					
+					// Checks for player enemy ship collision events
+					for (var i = 0; i < enemyShips.length + 1; i++)
+					{
+						if (typeof enemyShips[i] != "undefined")
+						{
+							if (parseInt(ship.style.left) >= parseInt(enemyShips[i].image.style.left)  - enemyShips[i].image.width &&
+								parseInt(ship.style.left) < parseInt(enemyShips[i].image.style.left) + enemyShips[i].image.width &&
+								parseInt(ship.style.top) >= parseInt(enemyShips[i].image.style.top) - enemyShips[i].image.height &&
+								parseInt(ship.style.top) < parseInt(enemyShips[i].image.style.top) + enemyShips[i].image.height)
+							{
+								if (isProtected === false)
+								{
+									enemyShips.splice(i, 1);
+									health -= 25;
+								}
+							}
+						}
+					}
+										
+					// Sets the ship's movement
+					if (isMovingLeft === true && parseInt(ship.style.left) >= 0)
+					{
+						ship.style.left = String(parseInt(ship.style.left) - (speed - 3));
+					}
+					if (isMovingRight === true && parseInt(ship.style.left) <= myCanvas.width - ship.width)
+					{
+						ship.style.left = String(parseInt(ship.style.left) + speed);
+					}
+					if (isMovingUp === true && parseInt(ship.style.top) >= 0)
+					{
+						ship.style.top = String(parseInt(ship.style.top) - (speed - 3));
+					}
+					if (isMovingDown === true && parseInt(ship.style.top) <= myCanvas.height - ship.height)
+					{
+						ship.style.top = String(parseInt(ship.style.top) + (speed - 3));
+					}
+					
+					// Sets the damage waves
+					if (isWaving === true)
+					{
+						context.beginPath();
+						context.arc(parseInt(ship.style.left) + 32, parseInt(ship.style.top) + 16, radius, 0, Math.PI * 2);
+						context.strokeStyle = "purple";
+						context.stroke();
+						
+						radius += 3;
+						
+						if (radius >= 350)
+						{
+							isWaving = false;
+							radius = 6;
+						}
+						
+						// Checks if an enemy has touched the wave
+						for (var i = 0; i < enemyShips.length + 1; i++)
+						{
+							var xdistance;
+							var ydistance;
+							var distanceFromPlayer;
+							
+							// Defines these variables
+							if (parseInt(enemyShips[i].image.style.top) <= parseInt(ship.style.top))
+							{
+								ydistance = parseInt(ship.style.top) - parseInt(enemyShips[i].image.style.top);
+							}
+							if (parseInt(enemyShips[i].image.style.top) > parseInt(ship.style.top))
+							{
+								ydistance = parseInt(enemyShips[i].image.style.top) - parseInt(ship.style.top);
+							}
+							
+							if (parseInt(enemyShips[i].image.style.left) <= parseInt(ship.style.left))
+							{
+								xdistance = parseInt(ship.style.left) - parseInt(enemyShips[i].image.style.left);
+							}
+							if (parseInt(enemyShips[i].image.style.left) > parseInt(ship.style.left))
+							{
+								xdistance = parseInt(enemyShips[i].image.style.left) - parseInt(ship.style.left);
+							}
+							
+							// Uses pythagoras to get the distance from the enemy ship to the player's ship
+							distanceFromPlayer = Math.sqrt(Math.pow(xdistance,2) + Math.pow(ydistance,2));
+							
+							// Compares distanceFromPlayer to radius
+							if (distanceFromPlayer <= radius)
+							{
+								enemyShips.splice(i, 1);
+								money += 10;
+							}
+						}
+					}
+					
+					// Checks if the player is dead
+					if (health <= 0)
+					{
+						alert("You are dead!");
+						alert("Restarting game...");
+						location.reload();
+					}
+				},
+	            17);
+				
+				// Enemy spawning function
+				setInterval(function()
+				{
+					var es = new EnemyShip();
+					es.image.style.left = String(myCanvas.width) + "px";
+					es.image.style.top = getRandomInt(32, myCanvas.height - 32);
+					
+					enemyShips.push(es);
+				},
+				1500);
+				
+				// Sets the firing
+				setInterval(function()
+				{
+					if (rapidFireEnabled === true && isSpacePressed === true)
+					{
+						bullets.push(document.createElement("img"));
+						bullets[bullets.length - 1].src = bulletSprite;
+								
+						bullets[bullets.length - 1].style.top = parseInt(ship.style.top) + 8;
+						bullets[bullets.length - 1].style.left = parseInt(ship.style.left) + 40;
+					}
+				},
+				100);
+
+	            // KeyDown function
+	            document.onkeydown = function(e)
+	            {
+					var key = String.fromCharCode(e.keyCode);
+					
+					if (key === 'A')
+					{
+						// Left
+						isMovingLeft = true;
+					}
+					if (key === 'S')
+					{
+						// Down
+						isMovingDown = true;
+					}
+					if (key === 'D')
+					{
+						// Right
+						isMovingRight = true;
+					}
+					if (key === 'W')
+					{
+						// Up
+						isMovingUp = true;
+					}
+					if (key === ' ')
+					{
+						// Space bar
+						isSpacePressed = true;
+						
+						if (hasShotOnce === false)
+						{
+							bullets.push(document.createElement("img"));
+							bullets[bullets.length - 1].src = bulletSprite;
+									
+							bullets[bullets.length - 1].style.top = parseInt(ship.style.top) + 8;
+							bullets[bullets.length - 1].style.left = parseInt(ship.style.left) + 40;
+							
+							hasShotOnce = true;
+						}
+					}
+					if (key === 'K')
+					{
+						money = 200;
+					}
+	            };
+	
+	            // KeyUp function
+	            document.onkeyup = function(e)
+	            {
+					var key = String.fromCharCode(e.keyCode);
+					
+					if (key === 'A')
+					{
+						// Left
+						isMovingLeft = false;
+					}
+					if (key === 'S')
+					{
+						// Down
+						isMovingDown = false;
+					}
+					if (key === 'D')
+					{
+						// Right
+						isMovingRight = false;
+					}
+					if (key === 'W')
+					{
+						// Up
+						isMovingUp = false;
+					}
+					if (key === ' ')
+					{
+						// Spacebar
+						isSpacePressed = false;
+						hasShotOnce = false;
+					}
+	            };
+				
+				// Returns a random integer between min and max
+				// Using Math.round() will give you a non-uniform distribution!
+				function getRandomInt(min, max)
+				{
+  					return Math.floor(Math.random() * (max - min + 1)) + min;
+				}
+				
+				// Waits for a while to turn off protected
+				function protectedTimeout()
+				{
+					setTimeout(function()
+					{
+						isProtected = false;
+					},
+					10000);
+				}
+			
+			</script>
+	</head>
+	
+	<body>
+    
+	<table width="200" border="1">
+      <tr>
+            <td height="604"><canvas id="myCanvas" height="600" width="800" style="border:solid"> </canvas></td>
+            <td><table width="267" border="1">
+              <tr>
+                <td height="46" colspan="3" align="center" valign="middle"><strong>SHOP</strong></td>
+              </tr>
+              <tr>
+                <td height="23" colspan="3"><div align="center"><em>Ship Upgrades</em></div></td>
+              </tr>
+              <tr>
+                <td width="82" height="23" align="center" valign="middle"><img src="ship.png" alt="Ship1" width="53" height="25" align="middle" onClick="
+                alert('Red Ship');
+                alert('The default ship.');
+                "></td>
+                <td width="81" align="center" valign="middle"><img src="ship2.png" alt="ship2" width="53" height="25" align="middle" onClick="
+                alert('Blue Ship');
+                alert('A ship with increased speed.');
+                "></td>
+                <td width="82" align="center" valign="middle"><img src="ship3.png" alt="ship3" width="53" height="25" align="middle" onClick="
+                alert('Black Ship');
+                alert('The fastest ship with rapid-fire capabilities.');
+                "></td>
+              </tr>
+              <tr>
+                <td height="35" align="center" valign="middle">Free</td>
+                <td align="center" valign="middle">100 credits</td>
+                <td align="center" valign="middle">200 credits</td>
+              </tr>
+              <tr>
+                <td height="28" align="center" valign="top">&nbsp;</td>
+                <td align="center" valign="top"><form name="form1" method="post" action="">
+                  <input type="button" name="purchaseShip2" id="purchaseShip2" value="Purchase" onClick="
+                  if (money >= 100)
+                  {
+                  		speed = 7;
+                  		ship.src = 'ship2.png';
+                        money -= 100;
+                        document.getElementById('purchaseShip2').style.visibility = 'hidden';
+                  		document.getElementById('purchaseShip2').blur();
+                        
+                        alert('You have bought the Blue Ship!');
+                        alert('You can now fly faster than before!');
+                  }
+                  else
+                  {
+                  	document.getElementById('purchaseShip2').blur();
+                  }
+                  ">
+                </form></td>
+                <td align="center" valign="top">
+                	<input type="button" name="purchaseShip3" id="purchaseShip3" value="Purchase" onClick="
+                    if (money >= 200)
+                  	{
+                  		speed = 10;
+                  		ship.src = 'ship3.png';
+                        money -= 200;
+                        rapidFireEnabled = true;
+                        document.getElementById('purchaseShip3').style.visibility = 'hidden';
+                  		document.getElementById('purchaseShip3').blur();
+                        document.getElementById('purchaseShip2').style.visibility = 'hidden';
+                  		document.getElementById('purchaseShip2').blur();
+                        
+                        alert('You have bought the Black Ship!');
+                        alert('You can now fly much faster than before!');
+                        alert('You can also do rapid-fire by holding down the space-bar!');
+                  	}
+                    else
+                    {
+                    	document.getElementById('purchaseShip3').blur();
+                    }
+                    ">
+                </td>
+              </tr>
+              <tr>
+                <td height="24" colspan="3"><div align="center"><em>Gun Upgrades</em></div></td>
+              </tr>
+              <tr>
+                <td height="23" align="center" valign="top"><img src="bullet.png" width="24" height="24" alt="bullet" onClick="
+                alert('Missiles');
+                alert('The standard projectile.');
+                "></td>
+                <td align="center" valign="top"><img src="bullet2.png" width="24" height="24" alt="bullet2" onClick="
+                alert('Lasers');
+                alert('Quicker than missiles and does one third of damage.');
+                "></td>
+                <td align="center" valign="top"><img src="bullet3.png" width="24" height="24" alt="bullet3" onClick="
+                alert('Plasma');
+                alert('The fastest type of projectile and can do one half of damage.');
+                "></td>
+              </tr>
+              <tr>
+                <td height="42" align="center">Free</td>
+                <td align="center" valign="middle">50 credits</td>
+                <td align="center" valign="middle">150 credits</td>
+              </tr>
+              <tr>
+                <td height="28" align="center">&nbsp;</td>
+                <td align="center" valign="middle">
+                	<input type="button" name="purchaseBullet2" id="purchaseBullet2" value="Purchase" onClick="
+                    if (money >= 50)
+                  	{
+                    	bulletSpeed = 15;
+                  		bulletSprite = 'bullet2.png';
+                        money -= 50;
+                        
+                        document.getElementById('purchaseBullet2').style.visibility = 'hidden';
+                  		document.getElementById('purchaseBullet2').blur();
+                        
+                        alert('You have bought the Laser Bullet!');
+                        alert('Your attacks are now quicker!');
+                        alert('You also deal more damage!');
+                  	}
+                    else
+                    {
+                    	document.getElementById('purchaseBullet2').blur();
+                    }
+                    ">
+                </td>
+                <td align="center" valign="middle">
+                	<input type="button" name="purchaseBullet3" id="purchaseBullet3" value="Purchase" onClick="
+                    if (money >= 150)
+                  	{
+                    	bulletSpeed = 20;
+                  		bulletSprite = 'bullet3.png';
+                        money -= 150;
+                        
+                        document.getElementById('purchaseBullet3').style.visibility = 'hidden';
+                  		document.getElementById('purchaseBullet3').blur();
+                        document.getElementById('purchaseBullet2').style.visibility = 'hidden';
+                  		document.getElementById('purchaseBullet2').blur();
+                        
+                        alert('You have bought the Plasma Bullet!');
+                        alert('Your attacks are now much quicker!');
+                        alert('You also deal even more damage!');
+                  	}
+                    else
+                    {
+                    	document.getElementById('purchaseBullet3').blur();
+                    }
+                    ">
+                </td>
+              </tr>
+              <tr>
+                <td height="28" colspan="3" align="center"><div align="center"><em>Items</em></div></td>
+              </tr>
+              <tr>
+                <td height="28" align="center"><img src="health.png" width="24" height="24" alt="health" onClick="
+                alert('Health Pack');
+                alert('Replenishes all your health.');
+                "></td>
+                <td height="28" align="center"><img src="shield.png" width="24" height="24" alt="shield" onClick="
+                alert('Protection');
+                alert('Temporarily gives your ship invincibility.');
+                "></td>
+                <td height="28" align="center"><img src="wave.png" width="24" height="24" alt="wave" onClick="
+                alert('Damage Wave');
+                alert('Creates a Damage Wave from the ship, destroying any enemy ships that touch it.');
+                "></td>
+              </tr>
+              <tr>
+                <td height="28" align="center">50 credits</td>
+                <td height="28" align="center">90 credits</td>
+                <td height="28" align="center">60 credits</td>
+              </tr>
+              <tr>
+                <td height="28" align="center"><input type="button" name="purchaseHealth" id="purchaseHealth" value="Purchase" onClick="
+                    if (money >= 50 && health < 100)
+                  	{
+                    	money -= 50;
+                        health = 100;
+                  	}
+                    else
+                    {
+                    	document.getElementById('purchaseHealth').blur();
+                    }
+                    "></td>
+                <td height="28" align="center"><input type="button" name="purchaseShield" id="purchaseShield" value="Purchase" onClick="
+                	
+                    if (money >= 90)
+                    {
+                    	money -= 90;
+                        isProtected = true;
+                        protectedTimeout();
+                        
+                        document.getElementById('purchaseShield').blur();
+                    }
+                    else
+                    {
+                    	document.getElementById('purchaseShield').blur();
+                    }
+                    "></td>
+                <td height="28" align="center"><input type="button" name="purchaseWave" id="purchaseWave" value="Purchase" onClick="
+                	
+                    if (money >= 60)
+                    {
+                    	money -= 60;
+                        isWaving = true;
+                        
+                        document.getElementById('purchaseWave').blur();
+                    }
+                    else
+                    {
+                    	document.getElementById('purchaseWave').blur();
+                    }
+                    "></td>
+              </tr>
+              <tr>
+                <td height="28" colspan="3" align="center" valign="top"><img src="arrow.png" width="55" height="53" alt="arrow" onClick="
+                alert('In order to proceed to the next level, you need to fully upgrade your ship and your projectiles.');
+                "></td>
+              </tr>
+              <tr>
+                <td height="28" colspan="3" align="center" valign="top"><p>
+                  <input type="button" name="nextLevel" id="nextLevel" value="Proceed to next level" onClick="
+                    
+                    if (speed != 10)
+                    {
+                    	alert('You need to fully upgrade your ship!');
+                    }
+                    else
+                    {
+                    	if (bulletSpeed != 20)
+                        {
+                        	alert('You need to fully upgrade your projectiles!');
+                        }
+                        else
+                        {
+                        	// They can go to the next level now.
+                            alert('As you\'re blasting hundreds of enemy ships, you see a strange vortex.');
+                            alert('Unable to escape, you have no choice but to allow it to suck you into itself!');
+                            window.location.href = 'prologueCutscene.html';
+                        }
+                    }
+                    
+                    document.getElementById('nextLevel').blur();
+                    
+                    ">
+                </p></td>
+              </tr>
+            </table></td>
+      </tr>
+    </table>
+	
+    </body>
+	
+</html>

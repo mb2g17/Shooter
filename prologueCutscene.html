@@ -1,0 +1,146 @@
+<html>
+
+	<head>
+		<title>Space Business</title>
+        
+        <script type="text/javascript">
+			
+			function start()
+			{
+				var myCanvas = document.getElementById("myCanvas");
+				var context = myCanvas.getContext('2d');
+				
+				var ship = document.createElement("img");
+				ship.src = "ship3.png";
+				ship.style.left = 40;
+				ship.style.top = myCanvas.height / 2;
+				
+				var background = document.createElement("img");
+				background.src = "spaceBackground.png";
+				background.style.left = 0;
+				background.style.top = 0;
+				
+				var interval = 1;
+				var loop;
+				
+				setTimeout(function()
+				{
+					alert("As you move closer and closer to the vortex, you feel your ship start to vibrate.");
+					alert("You start to feel a bit queasy as your ship violently tremble.");
+					clearInterval(loop);
+					
+					var vibration = 0;
+					
+					setTimeout(function()
+					{
+						alert("As you look outside your ship, you notice something strange.");
+						alert("It is as if the view outside has been frozen in a solid state!");
+						alert("The only animate things you can see are yourself and your control panel.");
+						
+						setTimeout(function()
+						{
+							alert("After a minute of confusion and waiting, you notice a white light at the end of this vortex.");
+							alert("You have no choice but to travel into the light.");
+							clearInterval(loop);
+							
+							var radius = 1;
+							
+							setTimeout(function()
+							{
+								alert("As you are fully immersed in the light, you see a planet in the distance.");
+								alert("This planet looks like the surface of Mars, except this planet is the same size as Earth.");
+								alert("Your ship's planet identifier tells you that this planet is called Andromeda X56, or A-X56.");
+								alert("A-X56's gravity has the same force as Earth's and it's atmosphere is primarily oxygen.");
+								alert("This means that A-X56 is a habitable planet!");
+								clearInterval(loop);
+								
+								radius = 1;
+								
+								setTimeout(function()
+								{
+									alert("As you travel to A-X56, you make sure to land properly.");
+									window.location.href = "prologueCutscene2.html";
+								},
+								4300);
+								
+								loop = setInterval(function()
+								{
+									context.beginPath();
+									context.arc(myCanvas.width, myCanvas.height / 2, radius, 0, Math.PI * 2);
+									context.fillStyle = "orange";
+									context.fill();
+									
+									context.drawImage(ship, parseInt(ship.style.left), parseInt(ship.style.top) + vibration);
+									
+									radius += 3;
+								},
+								17);
+							},
+							7000);
+							
+							loop = setInterval(function()
+							{
+								context.beginPath();
+								context.arc(myCanvas.width, myCanvas.height / 2, radius, 0, Math.PI * 2);
+								context.fillStyle = "white";
+								context.fill();
+								
+								context.drawImage(ship, parseInt(ship.style.left), parseInt(ship.style.top) + vibration);
+								
+								radius += 3;
+							},
+							17);
+						},
+						2000);
+					},
+					2000);
+					
+					loop = setInterval(function()
+					{
+						context.drawImage(background, parseInt(background.style.left), parseInt(background.style.top));
+						context.drawImage(background, parseInt(background.style.left) + background.width, parseInt(background.style.top));
+						
+						context.drawImage(ship, parseInt(ship.style.left), parseInt(ship.style.top) + vibration);
+						
+						background.style.left = String(parseInt(background.style.left) - interval);
+						
+						interval += 0.1;
+						
+						if (vibration === 0)
+							vibration = 2;
+						else
+							vibration = 0;
+					},
+					17);
+				},
+				1500);
+				
+				loop = setInterval(function()
+				{
+					context.drawImage(background, parseInt(background.style.left), parseInt(background.style.top));
+					context.drawImage(background, parseInt(background.style.left) + background.width, parseInt(background.style.top));
+					
+					context.drawImage(ship, parseInt(ship.style.left), parseInt(ship.style.top));
+					
+					background.style.left = String(parseInt(background.style.left) - interval);
+					
+					interval += 0.1;
+				},
+				17);
+			}
+			
+		</script>
+        
+	</head>
+
+	<body onLoad="start();">
+    
+		<table width="200" border="1">
+ 		 <tr>
+  		  <td height="604"><canvas id="myCanvas" height="600" width="800" style="border:solid"> </canvas></td>
+ 		 </tr>
+		</table>
+    
+	</body>
+    
+</html>

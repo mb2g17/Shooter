@@ -1,0 +1,107 @@
+<html>
+
+	<head>
+		<title>Space Business</title>
+        
+        <script>
+			
+			function start()
+			{
+				var myCanvas = document.getElementById("myCanvas");
+				var context = myCanvas.getContext('2d');
+				
+				var ship = document.createElement("img");
+				ship.src = "ship3.png";
+				ship.style.left = 40;
+				ship.style.top = myCanvas.height / 2;
+				
+				var shipPos = 0;
+				var intervals = 10;
+				var loop;
+				
+				setTimeout(function()
+				{
+					alert("As you land on A-X56, you see two alien aircrafts flying towards you.");
+					alert("They don't seem harmful; on the contrary, they look like they want to talk to you.");
+					clearInterval(loop);
+					
+					var alien1 = document.createElement("img");
+					alien1.src = "alienShip.png";
+					alien1.style.left = myCanvas.width;
+					alien1.style.top = myCanvas.height / 2;
+					
+					var alien2 = document.createElement("img");
+					alien2.src = "alienShip.png";
+					alien2.style.left = myCanvas.width + 128;
+					alien2.style.top = myCanvas.height / 2 + 64;
+					
+					setTimeout(function()
+					{
+						alert("After a brief introduction and explanation, the aliens decide to help you.");
+						alert("However, the aliens have no idea on how to get you back to Earth.");
+						alert("The aliens decide that, to get you back, you need a ship of the best technology.");
+						alert("This type of ship will allow you to travel through space almost instantaneously by generating wormholes.");
+						alert("Unfortunately, this type of technology is staggeringly expensive, and the aliens don't have this kind of money.");
+						alert("It's up to you to get enough money to purchase a good enough ship so that you can escape A-X56 and return to Earth!");
+						alert("To do this, you would need to build up a tycoon selling alien goods in order to get enough income to go back to Earth...");
+						alert("...are you up to the challenge?");
+						window.location.href = "mainMenu.html";
+					},
+					4000);
+					
+					loop = setInterval(function()
+					{
+						context.fillStyle = "orange";
+						context.fillRect(0, 0, myCanvas.width, myCanvas.height);
+						
+						context.fillStyle = "rgb(210,105,0)";
+						context.fillRect(0, myCanvas.height / 4 * 3, myCanvas.width, myCanvas.height);
+						
+						context.drawImage(ship, 30, shipPos);
+						
+						context.drawImage(alien1, parseInt(alien1.style.left), parseInt(alien1.style.top));
+						context.drawImage(alien2, parseInt(alien2.style.left), parseInt(alien2.style.top));
+						
+						if (parseInt(alien1.style.left) > myCanvas.width / 3)
+						{
+							alien1.style.left = String(parseInt(alien1.style.left) - 3);
+							alien2.style.left = String(parseInt(alien2.style.left) - 3);
+						}
+					},
+					17);
+					
+				},
+				5000);
+				
+				loop = setInterval(function()
+				{
+					context.fillStyle = "orange";
+					context.fillRect(0, 0, myCanvas.width, myCanvas.height);
+					
+					context.fillStyle = "rgb(210,105,0)";
+					context.fillRect(0, myCanvas.height / 4 * 3, myCanvas.width, myCanvas.height);
+					
+					context.drawImage(ship, 30, shipPos);
+					
+					if (!(shipPos >= myCanvas.height / 4 * 3 - ship.height + 5))
+						shipPos += intervals;
+					if (!(intervals <= 1))
+						intervals -= 0.16;
+				},
+				17);
+			}
+			
+		</script>
+        
+	</head>
+
+	<body onLoad="start();">
+    
+        <table width="200" border="1">
+          <tr>
+            <td height="604"><canvas id="myCanvas" height="600" width="800" style="border:solid"> </canvas></td>
+          </tr>
+        </table>
+        
+	</body>
+</html>
